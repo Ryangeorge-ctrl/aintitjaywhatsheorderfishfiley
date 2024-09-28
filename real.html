@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Search Engine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.23.8/babel.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const mockGames = [
+            { id: 1, title: "The Legend of Zelda: Breath of the Wild", description: "Explore a vast open world filled with dungeons, puzzles, and enemies. Climb towers, cook meals, and save the kingdom of Hyrule.", image: "https://via.placeholder.com/200x200.png?text=Zelda" },
+            { id: 2, title: "Red Dead Redemption 2", description: "Experience the Wild West as Arthur Morgan, an outlaw and member of the Van der Linde gang. Rob trains, hunt wildlife, and make moral choices that affect the story.", image: "https://via.placeholder.com/200x200.png?text=RDR2" },
+            { id: 3, title: "Minecraft", description: "Build, craft, and survive in a blocky world limited only by your imagination. Mine resources, create tools, and defend against monsters in this sandbox game.", image: "https://via.placeholder.com/200x200.png?text=Minecraft" },
+            { id: 4, title: "The Witcher 3: Wild Hunt", description: "Play as Geralt of Rivia, a monster hunter for hire. Navigate a dark fantasy world, make impactful decisions, and engage in intense sword combat.", image: "https://via.placeholder.com/200x200.png?text=Witcher+3" },
+            { id: 5, title: "Grand Theft Auto V", description: "Explore the sprawling city of Los Santos as three criminals looking to make it big. Pull off heists, play tennis, and cause mayhem in this open-world action game.", image: "https://via.placeholder.com/200x200.png?text=GTA+V" },
+            { id: 6, title: "Portal 2", description: "Use your portal gun to solve mind-bending puzzles in Aperture Science Laboratories. Navigate through test chambers and uncover the dark humor of GLaDOS.", image: "https://via.placeholder.com/200x200.png?text=Portal+2" },
+            { id: 7, title: "Super Mario Odyssey", description: "Join Mario on a globe-trotting adventure to save Princess Peach. Use Cappy to possess objects and enemies, and collect Power Moons to fuel your airship.", image: "https://via.placeholder.com/200x200.png?text=Mario+Odyssey" },
+            { id: 8, title: "Overwatch", description: "Choose from a diverse cast of heroes and engage in team-based objective battles. Use unique abilities and coordinate with your team to secure victory.", image: "https://via.placeholder.com/200x200.png?text=Overwatch" },
+        ];
+
+        const fuseOptions = {
+            keys: ['title', 'description'],
+            threshold: 0.3,
+            includeScore: true,
+        };
+
+        const fuse = new Fuse(mockGames, fuseOptions);
+
+        function GameSearchEngine() {
+            const [searchTerm, setSearchTerm] = useState("");
+            const [searchResults, setSearchResults] = useState(mockGames);
+
+            useEffect(() => {
+                if (searchTerm) {
+                    const results = fuse.search(searchTerm);
+                    setSearchResults(results.map(result => result.item));
+                } else {
+                    setSearchResults(mockGames);
+                }
+            }, [searchTerm]);
+
+            return (
+                <div className="container mx-auto px-4 py-8">
+                    <h1 className="text-3xl font-bold mb-8 text-center">Game Search Engine</h1>
+                    <div className="relative mb-8">
+                        <input
+                            type="text"
+                            placeholder="Search for games..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                        {searchResults.map((game) => (
+                            <div key={game.id} className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col transition-all duration-300 ease-in-out hover:shadow-lg transform hover:scale-105">
+                                <img src={game.image} alt={game.title} className="w-full h-48 object-cover" />
+                                <div className="p-4 flex-grow">
+                                    <h2 className="text-lg font-semibold mb-2">{game.title}</h2>
+                                    <div className="relative">
+                                        <p className="text-sm text-gray-600 mb-2 line-clamp-2 group-hover:line-clamp-none transition-all duration-300 ease-in-out">
+                                            {game.description}
+                                        </p>
+                                        <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-white to-transparent group-hover:opacity-0 transition-opacity duration-300 ease-in-out"></div>
+                                    </div>
+                                </div>
+                                <div className="bg-gray-100 p-4">
+                                    <a href={`#play/${game.id}`} className="block w-full text-center bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition-colors duration-300">
+                                        Play
+                                    </a>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    {searchResults.length === 0 && (
+                        <p className="text-center text-gray-600 mt-8">No games found. Try a different search term.</p>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<GameSearchEngine />);
+    </script>
+</body>
+</html>
